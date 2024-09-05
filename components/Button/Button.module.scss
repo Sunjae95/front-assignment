@@ -1,0 +1,64 @@
+$width: "100%";
+
+$height-small: 32px;
+$height-default: 36px;
+$height-large: 40px;
+
+$padding-small: "8px 8px";
+$padding-default: "8px 16px";
+$padding-large: "16px 16px";
+
+$font-small: 12px;
+$font-default: 14px;
+$font-large: 16px;
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: var(--width, "100%");
+  height: var(--height);
+  padding: var(--padding);
+  font-size: var(--font-size);
+  border-radius: 4px;
+  cursor: pointer;
+
+  &.primary {
+    background-color: #fff;
+    color: var(--color, "#000");
+    border: 1px solid var(--color, "#000");
+  }
+  &.dangerous {
+    background-color: var(--color, "#000");
+    color: #fff;
+    border: none;
+  }
+
+  &.small {
+    --width: #{$width};
+    --height: #{$height-small};
+    --padding: #{$padding-small};
+    --font-size: #{$font-small};
+  }
+
+  &.default {
+    --width: #{$width};
+    --height: #{$height-default};
+    --padding: #{$padding-default};
+    --font-size: #{$font-default};
+  }
+
+  &.large {
+    --width: #{$width};
+    --height: #{$height-large};
+    --padding: #{$padding-large};
+    --font-size: #{$font-large};
+  }
+}
+
+.container:disabled {
+  cursor: not-allowed;
+  background-color: #ccc;
+  border: 2px solid #ccc;
+  color: #a6a4a4;
+}
