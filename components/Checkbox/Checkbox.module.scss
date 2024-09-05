@@ -1,0 +1,43 @@
+.label {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input {
+  display: none;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border: 2px solid #f5f5f5;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.input[type="checkbox"]:checked + .checkbox {
+  background-color: #0070f3;
+  border: 2px solid #0070f3;
+}
+
+.input[type="checkbox"]:disabled + .checkbox {
+  background-color: #ccc;
+  border: 2px solid #ccc;
+}
+
+.check-icon {
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.input[type="checkbox"]:checked ~ .checkbox .check-icon {
+  opacity: 1;
+  transition: all 0.3s ease;
+}
