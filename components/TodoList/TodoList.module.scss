@@ -1,0 +1,42 @@
+.create-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.todo-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px;
+  border: $border-default;
+  border-radius: $border-radius-default;
+}
+
+.container {
+  padding: 16px;
+  border: $border-default;
+  border-radius: $border-radius-default;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.button-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content {
+  margin-top: 16px;
+  border-top: $border-default;
+  padding-top: 16px;
+  font-size: $text-size-default;
+  line-height: 20px;
+  overflow-wrap: break-word;
+  white-space: break-spaces;
+}
