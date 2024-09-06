@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useState } from "react";
+import Link from "next/link";
 
 import styles from "./TodoList.module.scss";
 
@@ -84,12 +85,14 @@ export const TodoList = ({
         {data.map(({ id, isSuccess, title, content }) => (
           <div key={`todo-${id}`} className={styles.container}>
             <div className={styles.header}>
-              <Checkbox
-                checked={isSuccess}
-                label={title}
-                onChange={handleOnUpdate({ id, title, content })}
-              />
-              <div className={styles["button-wrapper"]}>
+              <div className={`${styles.header} ${styles.wrapper}`}>
+                <Checkbox
+                  checked={isSuccess}
+                  onChange={handleOnUpdate({ id, title, content })}
+                />
+                <Link href={`${id}`}>{title}</Link>
+              </div>
+              <div className={`${styles.header} ${styles.wrapper}`}>
                 <Button
                   color="black"
                   onClick={() => setForm({ id, isSuccess, title, content })}
