@@ -25,10 +25,22 @@
   justify-content: space-between;
 
   &.wrapper {
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 8px;
   }
+
+  &.button-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.title {
+  flex: 1;
+  cursor: pointer;
 }
 
 .content {

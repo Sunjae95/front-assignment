@@ -99,8 +99,8 @@ export const TodoList = ({
     <>
       <div className={styles["create-wrapper"]}>
         <Button
-          theme="primary"
-          color="black"
+          theme="dangerous"
+          color="green"
           width={"70px"}
           onClick={() => setForm(initialForm)}
         >
