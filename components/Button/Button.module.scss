@@ -1,3 +1,5 @@
+@import "variables.scss";
+
 $width: "100%";
 
 $height-small: 32px;
@@ -7,10 +9,6 @@ $height-large: 40px;
 $padding-small: "8px 8px";
 $padding-default: "8px 16px";
 $padding-large: "16px 16px";
-
-$font-small: 12px;
-$font-default: 14px;
-$font-large: 16px;
 
 .container {
   display: flex;
@@ -38,21 +36,21 @@ $font-large: 16px;
     --width: #{$width};
     --height: #{$height-small};
     --padding: #{$padding-small};
-    --font-size: #{$font-small};
+    --font-size: #{$text-size-small};
   }
 
   &.default {
     --width: #{$width};
     --height: #{$height-default};
     --padding: #{$padding-default};
-    --font-size: #{$font-default};
+    --font-size: #{$text-size-default};
   }
 
   &.large {
     --width: #{$width};
     --height: #{$height-large};
     --padding: #{$padding-large};
-    --font-size: #{$font-large};
+    --font-size: #{$text-size-medium};
   }
 }
 
