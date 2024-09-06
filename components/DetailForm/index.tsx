@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
 import styles from "./DetailForm.module.scss";
@@ -29,6 +29,9 @@ export const DetailForm = ({
   const params = useParams<{ id: string }>();
   const { push } = useRouter();
 
+  const ref = useRef<HTMLFormElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({ isSuccess, title, content });
 
@@ -42,95 +45,137 @@ export const DetailForm = ({
     } else {
       push(pathname);
     }
-  }, [push, pathname]);
+  }, [push, pathname, form.title, form.content]);
 
-  const handleOnClickAlert = useCallback(() => {
-    if (mode === "edit") {
-      setIsOpen(false);
-      push(pathname);
-    } else {
-      const data = new FormData();
-      data.append("id", params.id);
-      onDelete(data);
+  const handleGoReadDetail = () => {
+    setIsOpen(false);
+    setForm({ isSuccess, title, content });
+    push(pathname);
+  };
+
+  const handleOnDelete = async () => {
+    setIsLoading(true);
+
+    const data = new FormData();
+    data.append("id", params.id);
+
+    try {
+      await onDelete(data);
+    } catch (e) {
+      const { message } = e as Error;
+      setError(message);
+    } finally {
+      setIsLoading(false);
     }
-  }, [params, push, pathname, onDelete]);
+  };
 
   const handleOnUpdate = useCallback(
-    (data: FormData) => {
-      data.append("id", params.id);
-      data.append("isSuccess", isSuccess.toString());
-      onUpdate(data);
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+
+      try {
+        await onUpdate(formData);
+      } catch (e) {
+        const { message } = e as Error;
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
     },
-    [push, pathname, onUpdate]
+    [onUpdate]
   );
 
   const handleOnChangeCheckbox = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((f) => ({ ...f, isSuccess: e.target.checked }));
-      const data = new FormData();
-      data.append("id", params.id);
-      data.append("isSuccess", e.target.checked.toString());
-      data.append("title", form.title);
-      data.append("content", form.content);
-      onUpdate(data);
+      if (!ref.current) return;
+      setIsLoading(true);
+      const data = new FormData(ref.current);
+      data.set("isSuccess", e.target.checked.toString());
+      try {
+        await onUpdate(data);
+      } catch (e) {
+        const { message } = e as Error;
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
     },
     [form.title, form.content, onUpdate]
   );
 
   return (
-    <form className={styles.container} action={handleOnUpdate}>
+    <form ref={ref} className={styles.container} onSubmit={handleOnUpdate}>
+      <input
+        className={styles["input-none"]}
+        name="id"
+        value={params.id}
+        onChange={handleOnChange}
+      />
+      <input
+        className={styles["input-none"]}
+        name="isSuccess"
+        value={form.isSuccess.toString()}
+        onChange={handleOnChange}
+      />
       <div className={styles.header}>
-        {mode === "edit" ? (
-          <input
-            className={styles.input}
-            name="title"
-            value={form.title}
-            onChange={handleOnChange}
+        {mode === "read" && (
+          <Checkbox
+            name="isSuccess"
+            checked={form.isSuccess}
+            onChange={handleOnChangeCheckbox}
           />
-        ) : (
-          <>
-            <Checkbox
-              label={title}
-              checked={form.isSuccess}
-              onChange={handleOnChangeCheckbox}
-            />
-            <div className={styles["button-wrapper"]}>
-              <Button
-                color="black"
-                width={"80px"}
-                onClick={() => push("?mode=edit")}
-              >
-                Update
-              </Button>
-              <Button
-                theme="dangerous"
-                color="red"
-                width={"80px"}
-                onClick={() => setIsOpen(true)}
-              >
-                Delete
-              </Button>
-            </div>
-          </>
         )}
-      </div>
-      {mode === "edit" ? (
-        <textarea
-          className={styles.content}
-          name="content"
-          value={form.content}
+        <input
+          readOnly={mode === "read"}
+          className={styles.input}
+          name="title"
+          value={form.title}
           onChange={handleOnChange}
         />
-      ) : (
-        <p className={styles.content}>{content}</p>
-      )}
+        {mode === "read" && (
+          <div className={styles["button-wrapper"]}>
+            <Button
+              color="black"
+              width={"80px"}
+              onClick={() => push("?mode=edit")}
+            >
+              Update
+            </Button>
+            <Button
+              theme="dangerous"
+              color="red"
+              width={"80px"}
+              onClick={() => setIsOpen(true)}
+            >
+              Delete
+            </Button>
+          </div>
+        )}
+      </div>
+      <textarea
+        readOnly={mode === "read"}
+        className={styles.content}
+        name="content"
+        value={form.content}
+        onChange={handleOnChange}
+      />
       <div className={styles["button-wrapper"]}>
         {mode === "edit" ? (
           <>
-            <Button type="submit" theme="dangerous" color="red" width={"80px"}>
+            <Button
+              disabled={isLoading}
+              type="submit"
+              theme="dangerous"
+              color="blue"
+              width={"80px"}
+            >
               Ok
             </Button>
             <Button
+              disabled={isLoading}
               color="black"
               width={"80px"}
               onClick={handleOnClickEditPrevious}
@@ -139,7 +184,12 @@ export const DetailForm = ({
             </Button>
           </>
         ) : (
-          <Button color="black" width={"80px"} onClick={() => push("/")}>
+          <Button
+            disabled={isLoading}
+            color="black"
+            width={"80px"}
+            onClick={() => push("/")}
+          >
             Previous
           </Button>
         )}
@@ -152,15 +202,31 @@ export const DetailForm = ({
               : "todo를 정말 삭제할까요?"
           }
           left={{
+            disabled: isLoading,
             color: "black",
             children: "Cancel",
             onClick: () => setIsOpen(false),
           }}
           right={{
+            disabled: isLoading,
+            theme: "dangerous",
+            color: "blue",
+            children: "Ok",
+            onClick: () => {
+              if (mode === "edit") handleGoReadDetail();
+              else handleOnDelete();
+            },
+          }}
+        />
+      )}
+      {error !== null && (
+        <Alert
+          content={error}
+          right={{
+            children: "ok",
             theme: "dangerous",
             color: "red",
-            children: "Ok",
-            onClick: handleOnClickAlert,
+            onClick: () => setError(null),
           }}
         />
       )}
