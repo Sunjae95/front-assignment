@@ -1,0 +1,66 @@
+@import "variables.scss";
+
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  transform: translate(-50%, -50%);
+  padding: 16px;
+  font-size: $text-size-medium;
+  background-color: #fff;
+  border-radius: $border-radius-default;
+  border: $border-default;
+  z-index: $z-index-alert;
+}
+
+@media (min-width: 600px) {
+  .container {
+    width: 85%;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    width: 70%;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-none {
+  display: none;
+}
+
+.input {
+  width: 100%;
+  padding: 8px;
+  font-size: $text-size-medium;
+  border: $border-default;
+  border-radius: $border-radius-default;
+}
+
+.text-area {
+  width: 100%;
+  padding: 8px;
+  min-height: 120px;
+  font-size: $text-size-default;
+  border: $border-default;
+  border-radius: $border-radius-default;
+  resize: none;
+}
+
+.submit-button {
+  margin-top: 16px;
+}
