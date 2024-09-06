@@ -7,16 +7,18 @@ import { Button } from "../Button";
 import { Alert } from "../Alert";
 
 export interface ModalProps {
+  isLoading: boolean;
   header: string;
   id?: string;
   isSuccess?: boolean;
   title?: string;
   content?: string;
-  action?: (data: FormData) => void;
+  action?: (e: React.FormEvent) => Promise<void>;
   onClose: () => void;
 }
 
 export const Modal = ({
+  isLoading,
   header,
   id,
   isSuccess,
@@ -49,6 +51,7 @@ export const Modal = ({
       <div className={styles.header}>
         <p>{header}</p>
         <Button
+          disabled={isLoading}
           color="black"
           size="small"
           width={"32px"}
@@ -57,7 +60,7 @@ export const Modal = ({
           X
         </Button>
       </div>
-      <form className={styles.content} action={action}>
+      <form className={styles.content} onSubmit={action}>
         <input
           className={styles["input-none"]}
           name="id"
@@ -82,7 +85,12 @@ export const Modal = ({
           value={form.content}
           onChange={handleOnChange}
         />
-        <Button theme="dangerous" color="blue" type="submit">
+        <Button
+          theme="dangerous"
+          color="blue"
+          type="submit"
+          disabled={isLoading}
+        >
           Submit
         </Button>
       </form>

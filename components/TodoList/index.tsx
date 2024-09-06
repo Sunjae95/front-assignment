@@ -31,40 +31,66 @@ export const TodoList = ({
   onUpdate,
   onDelete,
 }: TodoListProps) => {
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<TodoType | null>(null);
 
   const handleOnUpdate = useCallback(
     (form: Omit<TodoType, "isSuccess">) =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+      async (e: React.ChangeEvent<HTMLInputElement>) => {
         const formData = new FormData();
-
         Object.entries(form).forEach(([key, value]) =>
           formData.append(key, value)
         );
         formData.append("isSuccess", e.target.checked.toString());
-
-        onUpdate(formData);
+        setIsLoading(form.id);
+        try {
+          await onUpdate(formData);
+        } catch (e) {
+          const { message } = e as Error;
+          setError(message);
+        } finally {
+          setIsLoading(null);
+        }
       },
     []
   );
 
-  const handleOnDelete = useCallback(async () => {
-    if (deleteId) {
+  const handleOnDelete = useCallback(
+    async (id: string) => {
       const formData = new FormData();
-      formData.append("id", deleteId);
-
-      await onDelete(formData);
-    }
-    setDeleteId(null);
-  }, [deleteId, onDelete]);
+      formData.append("id", id);
+      try {
+        setIsLoading(id);
+        await onDelete(formData);
+      } catch (e) {
+        const { message } = e as Error;
+        setError(message);
+      } finally {
+        setDeleteId(null);
+        setIsLoading(null);
+      }
+    },
+    [deleteId, onDelete]
+  );
 
   const handleOnAction = useCallback(
-    async (data: FormData) => {
-      if (form?.id) await onUpdate(data);
-      else await onCreate(data);
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      setIsLoading((formData.get("id") as string) || "true");
 
-      setForm(null);
+      try {
+        if (form?.id) await onUpdate(formData);
+        else await onCreate(formData);
+      } catch (e) {
+        const { message } = e as Error;
+        setError(message);
+      } finally {
+        setIsLoading(null);
+        setForm(null);
+      }
     },
     [onCreate, onUpdate, form]
   );
@@ -87,19 +113,24 @@ export const TodoList = ({
             <div className={styles.header}>
               <div className={`${styles.header} ${styles.wrapper}`}>
                 <Checkbox
+                  disabled={isLoading === id}
                   checked={isSuccess}
                   onChange={handleOnUpdate({ id, title, content })}
                 />
-                <Link href={`${id}`}>{title}</Link>
+                <Link href={`${id}`} className={styles.title}>
+                  <p>{title}</p>
+                </Link>
               </div>
-              <div className={`${styles.header} ${styles.wrapper}`}>
+              <div className={`${styles.header} ${styles["button-wrapper"]}`}>
                 <Button
+                  disabled={isLoading === id}
                   color="black"
                   onClick={() => setForm({ id, isSuccess, title, content })}
                 >
                   Update
                 </Button>
                 <Button
+                  disabled={isLoading === id}
                   theme="dangerous"
                   color="red"
                   onClick={() => setDeleteId(id)}
@@ -114,8 +145,9 @@ export const TodoList = ({
       </div>
       {form && (
         <Modal
+          isLoading={!!isLoading}
           {...form}
-          header={form?.id ? "update" : "create"}
+          header={form?.id ? "Update" : "Create"}
           onClose={() => setForm(null)}
           action={handleOnAction}
         />
@@ -124,11 +156,29 @@ export const TodoList = ({
         <Alert
           content="todo를 정말 삭제할까요?"
           left={{
+            disabled: !!isLoading,
             color: "black",
             children: "cancel",
             onClick: () => setDeleteId(null),
           }}
-          right={{ color: "red", children: "ok", onClick: handleOnDelete }}
+          right={{
+            disabled: !!isLoading,
+            theme: "dangerous",
+            color: "red",
+            children: "ok",
+            onClick: () => handleOnDelete(deleteId),
+          }}
+        />
+      )}
+      {error !== null && (
+        <Alert
+          content={error}
+          right={{
+            children: "ok",
+            theme: "dangerous",
+            color: "red",
+            onClick: () => setError(null),
+          }}
         />
       )}
     </>
